@@ -6,8 +6,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     ca-certificates libssl1.1 vim strace lsof curl jq && \
     rm -rf /var/cache/apt /var/lib/apt/lists/*
 
-ADD /solana-token-tracker /app/solana-token-tracker
+ADD /solana-token-tracker-sink /app/solana-token-tracker-sink
 
 ENV PATH "/app:$PATH"
 
-ENTRYPOINT ["/app/solana-token-tracker"]
+ENTRYPOINT ["/app/solana-token-tracker-sink"]
