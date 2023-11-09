@@ -36,7 +36,7 @@ func init() {
 	RootCmd.Flags().Uint64("stop-block", 0, "stop block number (0 means no stop block)")
 
 	// Manifest
-	RootCmd.Flags().String("output-module-type", "proto:hivemapper.types.v1.Output", "Expected output module type")
+	RootCmd.Flags().String("output-module-type", "proto:solana_token_tracker.types.v1.Output", "Expected output module type")
 }
 
 func rootRun(cmd *cobra.Command, args []string) error {
