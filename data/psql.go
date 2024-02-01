@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
 	_ "github.com/lib/pq"
 	pb "github.com/streamingfast/solana-token-tracker-sink/data/pb/solana-token-tracker/v1"
 	sink "github.com/streamingfast/substreams-sink"
@@ -120,10 +119,10 @@ func (p *Psql) resolveAddress(derivedAddress string) (string, error) {
 	return "", NotFound
 }
 
-func (p *Psql) HandleBlockUndo(blockId string) error {
-	_, err := p.tx.Exec("DELETE CASCADE FROM solana_tokens.blocks WHERE hash = $1", blockId)
+func (p *Psql) HandleBlocksUndo(lastValidBlockNum uint64) error {
+	_, err := p.tx.Exec("DELETE CASCADE FROM solana_tokens.blocks WHERE num > $1", lastValidBlockNum)
 	if err != nil {
-		return fmt.Errorf("deleting block: %w", err)
+		return fmt.Errorf("deleting block from %s: %w", lastValidBlockNum, err)
 	}
 	return nil
 }

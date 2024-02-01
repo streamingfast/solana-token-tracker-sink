@@ -133,7 +133,7 @@ func (s *Sinker) HandleBlockScopedData(ctx context.Context, data *pbsubstreamsrp
 }
 
 func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstreamsrpc.BlockUndoSignal, cursor *sink.Cursor) (err error) {
-	blockId := cursor.Block().ID()
+	lastValidBlockNum := undoSignal.LastValidBlock.Number
 
 	s.logger.Info("Handling undo block signal", zap.Stringer("block", cursor.Block()), zap.Stringer("cursor", cursor))
 
@@ -141,7 +141,7 @@ func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstr
 		if err != nil {
 			if s.db.tx != nil {
 				e := s.db.RollbackTransaction()
-				err = fmt.Errorf("undo block: %s rollback transaction: %w: while handling err %w", blockId, e, err)
+				err = fmt.Errorf("undo blocks: %s rollback transaction: %w: while handling err %w", lastValidBlockNum, e, err)
 			}
 
 			return
@@ -156,9 +156,9 @@ func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstr
 		return fmt.Errorf("begin transaction: %w", err)
 	}
 
-	err = s.db.HandleBlockUndo(blockId)
+	err = s.db.HandleBlocksUndo(lastValidBlockNum)
 	if err != nil {
-		return fmt.Errorf("handle block %s undo: %w", blockId, err)
+		return fmt.Errorf("handle blocks undo from %d : %w", lastValidBlockNum, err)
 	}
 
 	err = s.db.StoreCursor(cursor)
