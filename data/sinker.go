@@ -141,7 +141,7 @@ func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstr
 		if err != nil {
 			if s.db.tx != nil {
 				e := s.db.RollbackTransaction()
-				err = fmt.Errorf("undo blocks: %s rollback transaction: %w: while handling err %w", lastValidBlockNum, e, err)
+				err = fmt.Errorf("undo blocks: %d rollback transaction: %w: while handling err %w", lastValidBlockNum, e, err)
 			}
 
 			return
