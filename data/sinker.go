@@ -132,6 +132,38 @@ func (s *Sinker) HandleBlockScopedData(ctx context.Context, data *pbsubstreamsrp
 	return nil
 }
 
-func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstreamsrpc.BlockUndoSignal, cursor *sink.Cursor) error {
-	panic("should not be called on solana")
+func (s *Sinker) HandleBlockUndoSignal(ctx context.Context, undoSignal *pbsubstreamsrpc.BlockUndoSignal, cursor *sink.Cursor) (err error) {
+	blockId := cursor.Block().ID()
+
+	s.logger.Info("Handling undo block signal", zap.Stringer("block", cursor.Block()), zap.Stringer("cursor", cursor))
+
+	defer func() {
+		if err != nil {
+			if s.db.tx != nil {
+				e := s.db.RollbackTransaction()
+				err = fmt.Errorf("undo block: %s rollback transaction: %w: while handling err %w", blockId, e, err)
+			}
+
+			return
+		}
+		if s.db.tx != nil {
+			err = s.db.CommitTransaction()
+		}
+	}()
+
+	err = s.db.BeginTransaction()
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+
+	err = s.db.HandleBlockUndo(blockId)
+	if err != nil {
+		return fmt.Errorf("handle block %s undo: %w", blockId, err)
+	}
+
+	err = s.db.StoreCursor(cursor)
+	if err != nil {
+		return fmt.Errorf("store cursor: %w", err)
+	}
+	return nil
 }

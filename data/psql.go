@@ -120,6 +120,14 @@ func (p *Psql) resolveAddress(derivedAddress string) (string, error) {
 	return "", NotFound
 }
 
+func (p *Psql) HandleBlockUndo(blockId string) error {
+	_, err := p.tx.Exec("DELETE CASCADE FROM solana_tokens.blocks WHERE hash = $1", blockId)
+	if err != nil {
+		return fmt.Errorf("deleting block: %w", err)
+	}
+	return nil
+}
+
 func (p *Psql) HandleTransfers(dbBlockID int64, transfers []*pb.Transfer) error {
 	for _, transfer := range transfers {
 		dbTransactionID, err := p.handleTransaction(dbBlockID, transfer.TrxHash)

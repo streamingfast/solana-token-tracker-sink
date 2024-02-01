@@ -18,5 +18,6 @@ package data
 //	HandleBurns(dbBlockID int64, burns []*pb.Burn) error
 //	StoreCursor(cursor *sink.Cursor) error
 //	FetchCursor() (*sink.Cursor, error)
-//	HandleAITrainerPayments(dbBlockID int64, payments []*pb.AiTrainerPayment) error
+//	HandleBlockUndo
+
 //}
